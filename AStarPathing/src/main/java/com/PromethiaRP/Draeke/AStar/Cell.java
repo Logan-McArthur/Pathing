@@ -5,7 +5,6 @@ public class Cell {
 	private int m_Width, m_Height;
 	private Cell m_parent = null;
 	private int m_travelCost = 0;
-	private int m_pathCost = 10;
 	//private boolean m_isGoal = false;
 	//private boolean m_isStart = false;
 	private boolean m_walkable = true;

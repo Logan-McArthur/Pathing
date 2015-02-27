@@ -11,6 +11,7 @@ public class BinaryHeap {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private void swap(int a, int b) {
 		Integer tempA = heap.get(a);
 		Integer tempB = heap.get(b);
@@ -29,10 +30,12 @@ public class BinaryHeap {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private void sort() {
 		
 	}
 	
+	@SuppressWarnings("unused")
 	private int getParent(int index) {
 		return 0;
 	}
