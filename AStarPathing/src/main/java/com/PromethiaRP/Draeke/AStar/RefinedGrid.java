@@ -2,7 +2,11 @@ package com.PromethiaRP.Draeke.AStar;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -18,16 +22,16 @@ import org.newdawn.slick.SlickException;
 public class RefinedGrid extends BasicGame{
 
 	private Cell[][] cells;
-	private List<Point> openCells = new ArrayList<Point>();
-	private List<Point> closedCells = new ArrayList<Point>();
+	private Set<Cell> openCells = new TreeSet<Cell>();	// openCells should be sorted
+	private Set<Cell> closedCells = new HashSet<Cell>();	// closedCells does not need to be
 
 
 
 	private static int m_Width = 40;
 	private static int m_Height = 30;
 
-	private Point startCell;
-	private Point goalCell;
+	private Cell startCell;
+	private Cell goalCell;
 
 	private final int CELLWIDTH = 20;
 	private final int CELLHEIGHT = 20;
@@ -47,8 +51,8 @@ public class RefinedGrid extends BasicGame{
 			}
 		}
 
-		startCell = new Point(10,15);
-		goalCell = new Point(30,15);
+		startCell = cells[10][15];
+		goalCell = cells[30][15];
 
 		openCells.add(startCell);
 	}
@@ -94,8 +98,8 @@ public class RefinedGrid extends BasicGame{
 		// TODO Auto-generated method stub
 
 		{
-			for (Point pt : openCells) {
-				drawCell(grafix, cells[pt.x][pt.y], Color.green, Color.blue);
+			for (Cell pt : openCells) {
+				drawCell(grafix, cells[pt.getX()][pt.getY()], Color.green, Color.blue);
 			}
 		}
 
@@ -116,10 +120,10 @@ public class RefinedGrid extends BasicGame{
 
 		{
 			if(isFinished()) {
-				Cell c = cells[goalCell.x][goalCell.y];
+				Cell c = goalCell;
 				do {
-					fixPaths(c.getX(), c.getY());
-					fixPaths(c.getX(), c.getY());
+//					fixPaths(c.getX(), c.getY());
+//					fixPaths(c.getX(), c.getY());
 					drawParentLine(grafix,c, Color.cyan);
 				} while( (c = c.getParent())!= null );
 			}
@@ -134,11 +138,11 @@ public class RefinedGrid extends BasicGame{
 			grafix.setColor(Color.white);
 			grafix.drawString("( " + pt.x + ", " + pt.y + ")", 10, 10);
 			Cell cll = cells[pt.x][pt.y];
-			grafix.drawString("Total cost: " + (cll.getPathCost()+getGoalCost(cll.getX(), cll.getY())), 10, 25);
+			grafix.drawString("Total cost: " + (cll.getTotalCost()), 10, 25);
 			grafix.drawString("Path cost: " + cll.getPathCost(), 10, 40);
 		}
-		drawCell(grafix, cells[startCell.x][startCell.y],Color.green,Color.red);
-		drawCell(grafix, cells[goalCell.x][goalCell.y], Color.red, Color.orange);
+		drawCell(grafix, startCell, Color.green,Color.red);
+		drawCell(grafix, goalCell, Color.red, Color.orange);
 
 		//		{
 		//			if (isFinished()) {
@@ -202,35 +206,39 @@ public class RefinedGrid extends BasicGame{
 			running = false;
 			return;
 		}
-		int minX = openCells.get(minIndex).x;
-		int minY = openCells.get(minIndex).y;
-		//int minCost = getGoalCost(minX, minY);
-		int minCost = cells[minX][minY].getPathCost()+getGoalCost(minX,minY);
-		{
-			int currentX;
-			int currentY;
-			int currentCost;
-			for (int i = openCells.size()-1; i>=0; i--) {
-				currentX = openCells.get(i).x;
-				currentY = openCells.get(i).y;
-				currentCost = cells[currentX][currentY].getPathCost()+getGoalCost(currentX,currentY);
-				if (minCost > currentCost) {
-					minIndex = i;
-					minX = currentX;
-					minY = currentY;
-					minCost = currentCost;
-				}
-			}
+//		int minX = openCells.get(minIndex).x;
+//		int minY = openCells.get(minIndex).y;
+//		//int minCost = getGoalCost(minX, minY);
+//		int minCost = cells[minX][minY].getTotalCost();
+//		{
+//			int currentX;
+//			int currentY;
+//			int currentCost;
+//			for (int i = openCells.size()-1; i>=0; i--) {
+//				currentX = openCells.get(i).x;
+//				currentY = openCells.get(i).y;
+//				currentCost = cells[currentX][currentY].getPathCost()+getGoalCost(currentX,currentY);
+//				if (minCost > currentCost) {
+//					minIndex = i;
+//					minX = currentX;
+//					minY = currentY;
+//					minCost = currentCost;
+//				}
+//			}
+//
+//		}
 
-		}
-		//for (Point pt : closedCells){
-
-		//}
+		Iterator<Cell> iter = openCells.iterator();
+		Cell cll = iter.next();
+		
+		
+		iter.remove();
+		
 		// You now have the cell with the minimum path cost
 		// Add the surrounding cells to the open cell list
-		addAccessibleCells(cells[minX][minY]);
+		addAccessibleCells(cll);
 		//while (fixPaths(minX, minY));
-		fixPaths(minX, minY);
+//		fixPaths(cll.getX(), cll.getY());
 		if (isFinished()) {
 			running = false;
 			stepping = false;
@@ -246,12 +254,16 @@ public class RefinedGrid extends BasicGame{
 
 	public boolean finalizePath() {
 		boolean finalize = false;
-		for (Point c : closedCells) {
-			fixPaths(c.x, c.y);
-		}
+//		for (Cell cll : closedCells) {
+//			fixPaths(cll);
+//		}
 		return finalize;
 	}
 
+	public boolean fixPaths(Cell cll) {
+		return fixPaths(cll.getX(), cll.getY());
+	}
+	
 	public boolean fixPaths(int x, int y) {
 		boolean fix = false;
 		Cell cel = cells[x][y];
@@ -304,27 +316,28 @@ public class RefinedGrid extends BasicGame{
 		int x = currentCell.getX();
 		int y = currentCell.getY();
 		
-		closedCells.add(new Point(x, y));
-		openCells.remove(new Point(x, y));
+		closedCells.add(currentCell);
+		openCells.remove(currentCell);
 		for (Direction dir : Direction.values()) {
 			Point pt = new Point(x+dir.getDeltaX(), y+dir.getDeltaY());
 			if (checkOutOfBounds(dir, pt.x, pt.y)){
 				continue;
 			}
-			boolean walk = cells[pt.x][pt.y].getWalkable();
-			if ( openCells.contains(pt)) {
+			Cell cll = cells[pt.x][pt.y];
+			boolean walk = cll.getWalkable();
+			if ( openCells.contains(cll)) {
 				continue;
 			}
-			if (closedCells.contains(pt)){
-				fixPaths(pt.x, pt.y);
+			if (closedCells.contains(cll)){
+//				fixPaths(pt.x, pt.y);
 				continue;
 			}
 			if (walk) {
 				if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
 					continue;
 				}
-				openCells.add(pt);
-				cells[pt.x][pt.y].setParent(currentCell);
+				openCells.add(cll);
+				cll.setParent(currentCell);
 			}
 			
 			
@@ -333,8 +346,8 @@ public class RefinedGrid extends BasicGame{
 	}
 
 	public int getGoalCost(int x, int y) {
-		int dx = Math.abs(goalCell.x - x);
-		int dy = Math.abs(goalCell.y - y);
+		int dx = Math.abs(goalCell.getX() - x);
+		int dy = Math.abs(goalCell.getY() - y);
 		int num = dx * 10 + dy * 10;
 		return num;
 	}

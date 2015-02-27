@@ -1,11 +1,11 @@
 package com.PromethiaRP.Draeke.AStar;
 
-public class Cell {
+public class Cell implements Comparable<Cell> {
 	private int m_X, m_Y;
 	private int m_Width, m_Height;
 	private Cell m_parent = null;
 	private int m_travelCost = 0;
-	private int m_pathCost = 10;
+	private int m_goalCost = 0;
 	//private boolean m_isGoal = false;
 	//private boolean m_isStart = false;
 	private boolean m_walkable = true;
@@ -50,9 +50,9 @@ public class Cell {
 		return m_Y * m_Height;
 	}
 
-//	public int getTotalCost() {
-//		return getPathCost() + getGoalCost(m_X, m_Y);
-//	}
+	public int getTotalCost() {
+		return getPathCost() + m_goalCost;
+	}
 
 	public int getPathCost() {
 		if (m_parent == null) {
@@ -95,5 +95,11 @@ public class Cell {
 		} else {
 			return 14 + m_travelCost + getTurnCost();
 		}
+	}
+
+	@Override
+	public int compareTo(Cell arg) {
+		
+		return  getTotalCost() - arg.getTotalCost();
 	}
 }
