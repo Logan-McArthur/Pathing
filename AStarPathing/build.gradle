@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.stehno:gradle-natives:0.2.1'
+    }
+}
+
+apply plugin:'com.stehno.natives'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile group: 'org.slick2d', name: 'slick2d-core', version: '1.+'
+	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.+'
+}
+
+natives {
+	jars = [ 'lwjgl-platform-2.9.3-natives-windows', 
+        'lwjgl-platform-2.9.3-natives-osx', 
+        'lwjgl-platform-2.9.3-natives-linux',
+        'jinput-platform-2.0.5-natives-windows.jar',
+        'jinput-platform-2.0.5-natives-linux.jar',
+        'jinput-platform-2.0.5-natives-osx.jar' ]
+	platforms = 'windows'
+}

@@ -1,7 +1,6 @@
 package com.PromethiaRP.Draeke.AStar;
 
 import java.awt.Point;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +54,7 @@ public class RefinedGrid extends BasicGame{
 	}
 
 	public static void main(String args[]) {
+		//System.setProperty("java.library.path", "build\\natives\\windows");
 		try {
 			AppGameContainer app = new AppGameContainer(new RefinedGrid("Title", m_Width, m_Height));
 
