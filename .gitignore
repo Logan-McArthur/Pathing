@@ -1,11 +1,26 @@
-# Created by http://www.gitignore.io
+# Created by https://www.gitignore.io
+
+### Java ###
+*.class
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
 
 ### Eclipse ###
 *.pydevproject
 .metadata
 .gradle
-/bin/
-/tmp/
+bin/
+tmp/
 *.tmp
 *.bak
 *.swp
@@ -13,6 +28,9 @@
 local.properties
 .settings/
 .loadpath
+
+# Eclipse Core
+.project
 
 # External tool builders
 .externalToolBuilders/
@@ -23,10 +41,13 @@ local.properties
 # CDT-specific
 .cproject
 
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
 # PDT-specific
 .buildpath
 
-# sbteclipse plugin 
+# sbteclipse plugin
 .target
 
 # TeXlipse plugin
@@ -50,17 +71,16 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 
+# Windows shortcuts
+*.lnk
 
-### Java ###
-.class
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+### Gradle ###
+.gradle
+build/
 
-# Package Files #
-*.jar
-*.war
-*.ear
+# Ignore Gradle GUI config
+gradle-app.setting
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
