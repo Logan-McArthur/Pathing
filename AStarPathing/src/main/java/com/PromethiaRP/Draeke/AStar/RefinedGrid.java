@@ -103,7 +103,7 @@ public class RefinedGrid extends BasicGame{
 				drawCell(grafix, pt, Color.green, Color.blue);
 			}
 			for (Cell cll : closedCells) {
-				drawCell(grafix, cll, Color.lightGray, Color.red);
+				drawCell(grafix, cll, Color.lightGray, Color.gray);
 			}
 
 
@@ -145,7 +145,7 @@ public class RefinedGrid extends BasicGame{
 			grafix.drawString("( " + pt.x + ", " + pt.y + ")", 10, 10);
 			Cell cll = cells[pt.x][pt.y];
 			grafix.drawString("Total cost: " + (cll.getTotalCost()), 10, 25);
-			grafix.drawString("Path cost: " + cll.m_travelCost, 10, 40);
+			grafix.drawString("Path cost: " + cll.getPathCost(), 10, 40);
 			grafix.drawString("Goal cost: " + getGoalCost(this.getCellMousePosition()), 10, 55);
 			grafix.drawString("Heap top: " + openCells.peek().getTotalCost(), 10, 70);
 		}
@@ -266,33 +266,38 @@ public class RefinedGrid extends BasicGame{
 		int y = currentCell.getY();
 		
 		closedCells.add(currentCell);
-//		openCells.remove(currentCell);
-//		for (Direction dir : Direction.values()) {
-		for (int dx = -1; dx <=1; dx++) {
-			for (int dy = -1; dy <= 1; dy++) {
-				if (dy == dx && dy == 0) {
-					continue;
-				}
 
+		for (Direction dir : Direction.values()) {
+		
+			int dx = dir.getDeltaX();
+			int dy = dir.getDeltaY();
 			if (checkOutOfBounds(x+dx, y+dy)){
+				continue;
+			}
+			if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
 				continue;
 			}
 			Cell cll = cells[x+dx][y+dy];
 			boolean walk = cll.getWalkable();
-			if (closedCells.contains(cll) || openCells.contains(cll)) {
+			if (closedCells.contains(cll) || !walk) {
 				continue;
 			}
-			if (walk) {
-//				if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
-//					continue;
-//				}
-				
-				cll.setGoalCost(getGoalCost(cll.getX(),cll.getY()));
+			cll.setGoalCost(getGoalCost(x+dx,y+dy));
+			
+			if ( !openCells.contains(cll)) {
 				cll.setParent(currentCell);
 				openCells.insert(cll);
+			} else if (cll.isBetterPath(currentCell)) {
+				//System.out.println("Can be better");
+				cll.setParent(currentCell);
+				openCells.buildHeap();
+				// Check if the path cost for that cell is better if goes through currentCell
 			}
 			
-			}
+
+				
+		
+			
 		}
 
 	}
@@ -301,9 +306,9 @@ public class RefinedGrid extends BasicGame{
 		return getGoalCost(pt.x,pt.y);
 	}
 	public int getGoalCost(int x, int y) {
-		int dx = Math.abs(goalCell.getX() - x);
-		int dy = Math.abs(goalCell.getY() - y);
-		int num = (dx + dy) * 10;
+		int dx = Math.abs(goalCell.getX() - x)*10;
+		int dy = Math.abs(goalCell.getY() - y)*10;
+		int num = (int) Math.sqrt(dx*dx+dy*dy);
 		return num;
 	}
 

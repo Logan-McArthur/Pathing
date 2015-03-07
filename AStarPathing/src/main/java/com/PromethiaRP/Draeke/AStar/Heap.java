@@ -34,7 +34,7 @@ public class Heap<AnyType extends Comparable<AnyType>> implements Iterable<AnyTy
 	/**
 	 *   runs at O(size)
 	 */
-	private void buildHeap()
+	public void buildHeap()
 	{
 		for (int k = size/2; k > 0; k--)
 		{
