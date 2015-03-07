@@ -22,7 +22,7 @@ import org.newdawn.slick.SlickException;
 public class RefinedGrid extends BasicGame{
 
 	private Cell[][] cells;
-	private Set<Cell> openCells = new TreeSet<Cell>();	// openCells should be sorted
+	private Heap<Cell> openCells = new Heap<Cell>();	// openCells should be sorted
 	private Set<Cell> closedCells = new HashSet<Cell>();	// closedCells does not need to be
 
 
@@ -54,7 +54,8 @@ public class RefinedGrid extends BasicGame{
 		startCell = cells[10][15];
 		goalCell = cells[30][15];
 
-		openCells.add(startCell);
+		startCell.setGoalCost(getGoalCost(startCell.getX(),startCell.getY()));
+		openCells.insert(startCell);
 	}
 
 	public static void main(String args[]) {
@@ -97,14 +98,16 @@ public class RefinedGrid extends BasicGame{
 	public void render(GameContainer container, Graphics grafix) throws SlickException {
 		// TODO Auto-generated method stub
 
-		{
+		
 			for (Cell pt : openCells) {
-				drawCell(grafix, cells[pt.getX()][pt.getY()], Color.green, Color.blue);
+				drawCell(grafix, pt, Color.green, Color.blue);
 			}
-		}
+			for (Cell cll : closedCells) {
+				drawCell(grafix, cll, Color.lightGray, Color.red);
+			}
 
 
-		{
+		
 			for (int i = 0; i < cells.length; i++ ) {
 
 				for (int j = 0; j < cells[i].length; j++ ) {
@@ -116,7 +119,7 @@ public class RefinedGrid extends BasicGame{
 					}
 				}
 			}
-		}
+		
 
 		{
 			if(isFinished()) {
@@ -132,14 +135,19 @@ public class RefinedGrid extends BasicGame{
 		{
 			Point pt = getCellMousePosition();
 			Cell c = cells[pt.x][pt.y];
+			float lineWidth = grafix.getLineWidth();
+			grafix.setLineWidth(2 * lineWidth);
 			do {
-				drawParentLine(grafix,c, Color.gray);
+				drawParentLine(grafix,c, Color.blue);
 			} while( (c = c.getParent())!= null );
+			grafix.setLineWidth(lineWidth);
 			grafix.setColor(Color.white);
 			grafix.drawString("( " + pt.x + ", " + pt.y + ")", 10, 10);
 			Cell cll = cells[pt.x][pt.y];
 			grafix.drawString("Total cost: " + (cll.getTotalCost()), 10, 25);
-			grafix.drawString("Path cost: " + cll.getPathCost(), 10, 40);
+			grafix.drawString("Path cost: " + cll.m_travelCost, 10, 40);
+			grafix.drawString("Goal cost: " + getGoalCost(this.getCellMousePosition()), 10, 55);
+			grafix.drawString("Heap top: " + openCells.peek().getTotalCost(), 10, 70);
 		}
 		drawCell(grafix, startCell, Color.green,Color.red);
 		drawCell(grafix, goalCell, Color.red, Color.orange);
@@ -153,6 +161,8 @@ public class RefinedGrid extends BasicGame{
 		//				System.out.println("");
 		//			}
 		//		}
+		drawCell(grafix,openCells.peek(),Color.white,Color.blue);
+		
 	}
 
 	@Override
@@ -201,38 +211,9 @@ public class RefinedGrid extends BasicGame{
 		if (!running && !stepping) {
 			return;
 		}
-		int minIndex = openCells.size()-1;
-		if (minIndex == -1) {
-			running = false;
-			return;
-		}
-//		int minX = openCells.get(minIndex).x;
-//		int minY = openCells.get(minIndex).y;
-//		//int minCost = getGoalCost(minX, minY);
-//		int minCost = cells[minX][minY].getTotalCost();
-//		{
-//			int currentX;
-//			int currentY;
-//			int currentCost;
-//			for (int i = openCells.size()-1; i>=0; i--) {
-//				currentX = openCells.get(i).x;
-//				currentY = openCells.get(i).y;
-//				currentCost = cells[currentX][currentY].getPathCost()+getGoalCost(currentX,currentY);
-//				if (minCost > currentCost) {
-//					minIndex = i;
-//					minX = currentX;
-//					minY = currentY;
-//					minCost = currentCost;
-//				}
-//			}
-//
-//		}
 
-		Iterator<Cell> iter = openCells.iterator();
-		Cell cll = iter.next();
-		
-		
-		iter.remove();
+
+		Cell cll = openCells.deleteMin();
 		
 		// You now have the cell with the minimum path cost
 		// Add the surrounding cells to the open cell list
@@ -260,45 +241,13 @@ public class RefinedGrid extends BasicGame{
 		return finalize;
 	}
 
-	public boolean fixPaths(Cell cll) {
-		return fixPaths(cll.getX(), cll.getY());
-	}
-	
-	public boolean fixPaths(int x, int y) {
-		boolean fix = false;
-		Cell cel = cells[x][y];
-		Direction min = null;
-		int minCost = cel.getPathCost();
-		for (Direction d : Direction.values()) {
-			if (checkOutOfBounds(d, x, y)) {
-				continue;
-			}
-			if (cells[x+d.getDeltaX()]
-					[y+d.getDeltaY()].getPathCost() < minCost) {
-				if (!closedCells.contains(new Point(x+d.getDeltaX(), y +d.getDeltaY()))) {
-					continue;
-				}
-				if (cutsCorners(d, x, y)) {
-					continue;
-				}
-				min = d;
-				minCost = cells[x+d.getDeltaX()][y+d.getDeltaY()].getPathCost();
-				//				cel.m_parent = cells[x+d.getDeltaX()][y+d.getDeltaY()];
-				fix = true;
 
-			}
-		}
-		if (fix) {
-			cel.setParent(cells[x+min.getDeltaX()][y+min.getDeltaY()]);	
-		}
-		return fix;
-	}
 
-	private boolean checkOutOfBounds(Direction dir, int x, int y) {
-		if (x+dir.getDeltaX() < 0 || x+dir.getDeltaX() > cells.length-1){
+	private boolean checkOutOfBounds(int x, int y) {
+		if (x < 0 || x > cells.length-1){
 			return true;
 		}
-		if (y+dir.getDeltaY() < 0 || y+dir.getDeltaY() > cells[0].length-1){
+		if (y < 0 || y > cells[0].length-1){
 			return true;
 		}
 		return false;
@@ -317,38 +266,44 @@ public class RefinedGrid extends BasicGame{
 		int y = currentCell.getY();
 		
 		closedCells.add(currentCell);
-		openCells.remove(currentCell);
-		for (Direction dir : Direction.values()) {
-			Point pt = new Point(x+dir.getDeltaX(), y+dir.getDeltaY());
-			if (checkOutOfBounds(dir, pt.x, pt.y)){
+//		openCells.remove(currentCell);
+//		for (Direction dir : Direction.values()) {
+		for (int dx = -1; dx <=1; dx++) {
+			for (int dy = -1; dy <= 1; dy++) {
+				if (dy == dx && dy == 0) {
+					continue;
+				}
+
+			if (checkOutOfBounds(x+dx, y+dy)){
 				continue;
 			}
-			Cell cll = cells[pt.x][pt.y];
+			Cell cll = cells[x+dx][y+dy];
 			boolean walk = cll.getWalkable();
-			if ( openCells.contains(cll)) {
-				continue;
-			}
-			if (closedCells.contains(cll)){
-//				fixPaths(pt.x, pt.y);
+			if (closedCells.contains(cll) || openCells.contains(cll)) {
 				continue;
 			}
 			if (walk) {
-				if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
-					continue;
-				}
-				openCells.add(cll);
+//				if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
+//					continue;
+//				}
+				
+				cll.setGoalCost(getGoalCost(cll.getX(),cll.getY()));
 				cll.setParent(currentCell);
+				openCells.insert(cll);
 			}
 			
-			
+			}
 		}
 
 	}
 
+	public int getGoalCost(Point pt) {
+		return getGoalCost(pt.x,pt.y);
+	}
 	public int getGoalCost(int x, int y) {
 		int dx = Math.abs(goalCell.getX() - x);
 		int dy = Math.abs(goalCell.getY() - y);
-		int num = dx * 10 + dy * 10;
+		int num = (dx + dy) * 10;
 		return num;
 	}
 
