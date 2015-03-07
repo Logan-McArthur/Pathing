@@ -274,14 +274,15 @@ public class RefinedGrid extends BasicGame{
 			if (checkOutOfBounds(x+dx, y+dy)){
 				continue;
 			}
-			if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
-				continue;
-			}
 			Cell cll = cells[x+dx][y+dy];
 			boolean walk = cll.getWalkable();
 			if (closedCells.contains(cll) || !walk) {
 				continue;
 			}
+			if (!dir.isAxisAligned() && cutsCorners(dir, x, y)) {
+				continue;
+			}
+			
 			cll.setGoalCost(getGoalCost(x+dx,y+dy));
 			
 			if ( !openCells.contains(cll)) {

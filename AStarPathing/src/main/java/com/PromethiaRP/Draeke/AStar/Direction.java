@@ -23,7 +23,8 @@ enum Direction {
 	public boolean isFluidTurn(Direction dir) {
 		int myord = this.ordinal();
 		int dirord = dir.ordinal();
-		return Math.abs(myord - dirord) <= 1;
+		int dif = Math.abs(myord - dirord);
+		return dif == 1 || dif == 0 || dif == 7;
 	}
 	
 	public int getDeltaX() {

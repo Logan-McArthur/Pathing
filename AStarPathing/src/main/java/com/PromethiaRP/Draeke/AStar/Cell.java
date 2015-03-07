@@ -5,7 +5,9 @@ public class Cell implements Comparable<Cell> {
 	private int m_Width, m_Height;
 	private Cell m_parent = null;
 	private int m_travelCost = 0;
+
 	private int m_goalCost = 0;
+
 	//private boolean m_isGoal = false;
 	//private boolean m_isStart = false;
 	private boolean m_walkable = true;
@@ -74,9 +76,9 @@ public class Cell implements Comparable<Cell> {
 		if (dir == dir2) {
 			return 0;
 		}else if (dir.isFluidTurn(dir2)) {
-			return 2;
+			return 7;
 		} else {
-			return 3;
+			return 15;
 		}
 
 	}
