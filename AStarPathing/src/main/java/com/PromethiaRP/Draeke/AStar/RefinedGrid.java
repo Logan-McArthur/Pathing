@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -22,7 +24,7 @@ import org.newdawn.slick.SlickException;
 public class RefinedGrid extends BasicGame{
 
 	private Cell[][] cells;
-	private Heap<Cell> openCells = new Heap<Cell>();	// openCells should be sorted
+	private Queue<Cell> openCells = new PriorityQueue<Cell>();	// openCells should be sorted
 	private Set<Cell> closedCells = new HashSet<Cell>();	// closedCells does not need to be
 
 
@@ -55,7 +57,7 @@ public class RefinedGrid extends BasicGame{
 		goalCell = cells[30][15];
 
 		startCell.setGoalCost(getGoalCost(startCell.getX(),startCell.getY()));
-		openCells.insert(startCell);
+		openCells.add(startCell);
 	}
 
 	public static void main(String args[]) {
@@ -213,7 +215,7 @@ public class RefinedGrid extends BasicGame{
 		}
 
 
-		Cell cll = openCells.deleteMin();
+		Cell cll = openCells.poll();
 		
 		// You now have the cell with the minimum path cost
 		// Add the surrounding cells to the open cell list
@@ -287,11 +289,11 @@ public class RefinedGrid extends BasicGame{
 			
 			if ( !openCells.contains(cll)) {
 				cll.setParent(currentCell);
-				openCells.insert(cll);
+				openCells.add(cll);
 			} else if (cll.isBetterPath(currentCell)) {
 				//System.out.println("Can be better");
 				cll.setParent(currentCell);
-				openCells.buildHeap();
+				//openCells.buildHeap();
 				// Check if the path cost for that cell is better if goes through currentCell
 			}
 			
