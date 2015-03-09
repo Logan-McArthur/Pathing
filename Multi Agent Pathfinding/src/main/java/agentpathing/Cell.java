@@ -1,3 +1,4 @@
+package agentpathing;
 
 
 public class Cell {

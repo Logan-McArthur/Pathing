@@ -1,3 +1,4 @@
+package agentpathing;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -6,10 +7,14 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import agentpathing.behaviors.SearchBehavior;
+
 
 public class Agent {
 
-	private Grid grid;
+//	private Grid grid;
+	
+	private SearchBehavior behavior;
 	
 	private Queue<PathStep> openCells = new PriorityQueue<PathStep>();	// openCells should be sorted
 	private Set<PathStep> closedCells = new HashSet<PathStep>();	// closedCells does not need to be
@@ -18,13 +23,24 @@ public class Agent {
 	private PathStep pathEnd;
 	
 	private Cell goalCell;
+	private Cell startCell;
 	
-	public Agent(Grid grd, Cell start, Cell end) {
+	public Agent(SearchBehavior behave, Cell start, Cell end) {
+		startCell = start;
 		goalCell = end;
 		pathFront = new PathStep(start, getGoalCost(start));
 		pathEnd = null;
 		openCells.add(pathFront);
-		grid = grd;
+		behavior = behave;
+		behavior.setAgent(this);
+	}
+	
+	public void reset() {
+		openCells.clear();
+		closedCells.clear();
+		pathEnd = null;
+		pathFront = new PathStep(startCell, getGoalCost(startCell));
+		openCells.add(pathFront);
 	}
 	
 	public boolean isFinished() {
@@ -80,11 +96,33 @@ public class Agent {
 	}
 	
 	public void addAccessibleCells(PathStep current) {
+		if (current == null) {
+			System.out.println();
+			
+		}
 		closedCells.add(current);
 		if (current.node.equals(goalCell)) {
 			pathEnd = current;
 		}
-		Set<Cell> considerSet = getConnectedCells(current.node);
+		
+		int dX = 0;
+		int dY = 0;
+		if (current.previous != null) {
+			dX = current.node.getX() - current.previous.node.getX();
+			dY = current.node.getY() - current.previous.node.getY();
+			if (dX > 0) {
+				dX = 1;
+			} else if (dX < 0) {
+				dX = -1;
+			}
+			if (dY > 0) {
+				dY = 1;
+			} else if (dY < 0) {
+				dY = -1;
+			}
+		}
+		
+		Set<Cell> considerSet = getConnectedCells(current.node, dX, dY);
 		considerSet.removeAll(getCellsFromCollection(closedCells));
 		for (Cell consider : considerSet) {
 		
@@ -131,9 +169,9 @@ public class Agent {
 	}
 	
 	// Do not include Cells cut off by corners
-	private Set<Cell> getConnectedCells(Cell center) {
+	private Set<Cell> getConnectedCells(Cell center, int dX, int dY) {
 		
-		Set<Cell> cells = grid.getAdjacentCells(center);	// Consider initializing size to the number of links in center
+		Set<Cell> cells = behavior.getAdjacentCells(center, dX, dY);	// Consider initializing size to the number of links in center
 		
 		// Including the cells already in openCells
 		// Remove the ones in closedCells

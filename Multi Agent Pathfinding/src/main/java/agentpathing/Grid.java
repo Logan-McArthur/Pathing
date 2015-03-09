@@ -1,3 +1,4 @@
+package agentpathing;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,37 +26,6 @@ public class Grid {
 
 	}
 	
-	// Return all adjacent cells, no matter if they are walkable or not
-	public Set<Cell> getAdjacentCells(Cell center) {
-		return getAdjacentCells(center.getX(), center.getY());
-	}
-	
-	public Set<Cell> getAdjacentCells(int x, int y) {
-		Set<Cell> cells = new HashSet<Cell>();
-		
-		for (int dy = -1; dy <= 1; dy++) {
-			for (int dx = -1; dx <= 1; dx++) {
-				
-				if (isOutOfBounds(x+dx, y+dy)){
-					continue;
-				}
-				if (dx == dy && dx == 0) {
-					continue;
-				}
-				if (cutsCorners(x,y,dx,dy)) {
-					continue;
-				}
-				if (!map[x+dx][y+dy].getWalkable()) {
-					continue;
-				}
-				
-				cells.add(map[x+dx][y+dy]);
-			}
-		}
-		
-		return cells;
-	}
-	
 	public int getMapWidth() {
 		return map.length;
 	}
@@ -70,7 +40,7 @@ public class Grid {
 	
 	// x and y are the center
 	// dx and dy are the direction
-	private boolean cutsCorners(int x, int y, int dx, int dy) {
+	public boolean cutsCorners(int x, int y, int dx, int dy) {
 		
 		// It's either purely vertical or purely horizontal, so it won't cut corners
 		if (dx == 0 || dy == 0) {
@@ -96,6 +66,10 @@ public class Grid {
 			throw new IllegalArgumentException("Requested Cell outside bounds of Grid.");
 		}
 		return map[x][y];
+	}
+	
+	public boolean isWalkableCell(int x, int y) {
+		return map[x][y].getWalkable();
 	}
 	
 	public Set<Cell> getUnwalkableCells() {

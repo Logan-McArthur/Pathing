@@ -1,3 +1,4 @@
+package agentpathing;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,14 +15,17 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 
+import agentpathing.behaviors.AStarSearch;
+import agentpathing.behaviors.JumpSearch;
+
 
 public class RefinedGrid extends BasicGame{
 	public static void main(String args[]) {
 		try {
 			int windowWidth = 800;
 			int windowHeight = 600;
-			int cellsWide = 100;
-			int cellsTall = 75;
+			int cellsWide = 40;
+			int cellsTall = 30;
 			AppGameContainer app = new AppGameContainer(
 					new RefinedGrid("Title",cellsWide,cellsTall, (windowWidth / cellsWide), (windowHeight / cellsTall) ));
 
@@ -45,7 +49,7 @@ public class RefinedGrid extends BasicGame{
 		CELLWIDTH = cellWidth;
 		CELLHEIGHT = cellHeight;
 		cellGrid = new Grid(width, height);
-		createAgents(4);
+		createAgents(1);
 		Color[] colors = new Color[]{Color.cyan,Color.yellow,Color.magenta,Color.pink};
 		for (Color col : colors) {
 			agentColors.add(col);
@@ -61,7 +65,7 @@ public class RefinedGrid extends BasicGame{
 	
 	private void createAgents(int number) {
 		for ( ; number > 0; number--) {
-			agents.add(new Agent(cellGrid,getRandomCell(), getRandomCell()));
+			agents.add(new Agent(new JumpSearch(cellGrid),getRandomCell(), getRandomCell()));
 		}
 	}
 	
@@ -110,12 +114,15 @@ public class RefinedGrid extends BasicGame{
 		drawCellSet(grafix, cellGrid.getUnwalkableCells(), Color.white, Color.orange);
 		
 		for (int i = 0; i < agents.size(); i++) {
+			drawCellSet(grafix,agents.get(i).getOpenCells() , agentColors.get(i),Color.black);
+			drawCellSet(grafix,agents.get(i).getClosedCells() , Color.gray,Color.black);
+			
 			if (agents.get(i).isFinished())
 				drawParentLine(grafix, agents.get(i).getFinishedLine(), agentColors.get(i));
 			else {
 				drawParentLine(grafix, agents.get(i).getClosestLine(), agentColors.get(i));
 			}
-			drawCellSet(grafix,agents.get(i).getOpenCells() , agentColors.get(i),Color.black);
+			
 		}
 		
 		for (int i = 0; i < agents.size(); i++) {
@@ -170,6 +177,11 @@ public class RefinedGrid extends BasicGame{
 			return;
 		} else if (!Keyboard.isKeyDown(Keyboard.KEY_RETURN)) {
 			stepping = false;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_DELETE)) {
+			for (Agent agnt : agents) {
+				agnt.reset();
+			}
 		}
 		if (!running && !stepping) {
 			return;
