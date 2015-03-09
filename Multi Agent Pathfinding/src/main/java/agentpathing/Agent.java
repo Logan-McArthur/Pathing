@@ -25,6 +25,8 @@ public class Agent {
 	private Cell goalCell;
 	private Cell startCell;
 	
+	private boolean noPath = false;
+	
 	public Agent(SearchBehavior behave, Cell start, Cell end) {
 		startCell = start;
 		goalCell = end;
@@ -41,10 +43,11 @@ public class Agent {
 		pathEnd = null;
 		pathFront = new PathStep(startCell, getGoalCost(startCell));
 		openCells.add(pathFront);
+		noPath = false;
 	}
 	
 	public boolean isFinished() {
-		return pathEnd != null;
+		return pathEnd != null || noPath;
 	}
 	
 	public void nextStep() {
@@ -97,8 +100,8 @@ public class Agent {
 	
 	public void addAccessibleCells(PathStep current) {
 		if (current == null) {
-			System.out.println();
-			
+			noPath = true;
+			return;
 		}
 		closedCells.add(current);
 		if (current.node.equals(goalCell)) {

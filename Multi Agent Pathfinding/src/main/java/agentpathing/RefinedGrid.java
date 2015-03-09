@@ -24,8 +24,8 @@ public class RefinedGrid extends BasicGame{
 		try {
 			int windowWidth = 800;
 			int windowHeight = 600;
-			int cellsWide = 40;
-			int cellsTall = 30;
+			int cellsWide = 200;
+			int cellsTall = 150;
 			AppGameContainer app = new AppGameContainer(
 					new RefinedGrid("Title",cellsWide,cellsTall, (windowWidth / cellsWide), (windowHeight / cellsTall) ));
 
@@ -49,7 +49,7 @@ public class RefinedGrid extends BasicGame{
 		CELLWIDTH = cellWidth;
 		CELLHEIGHT = cellHeight;
 		cellGrid = new Grid(width, height);
-		createAgents(1);
+		createAgents(4);
 		Color[] colors = new Color[]{Color.cyan,Color.yellow,Color.magenta,Color.pink};
 		for (Color col : colors) {
 			agentColors.add(col);
@@ -65,6 +65,7 @@ public class RefinedGrid extends BasicGame{
 	
 	private void createAgents(int number) {
 		for ( ; number > 0; number--) {
+//			agents.add(new Agent(new JumpSearch(cellGrid), cellGrid.getCell(5, 15), cellGrid.getCell(35,15)));
 			agents.add(new Agent(new JumpSearch(cellGrid),getRandomCell(), getRandomCell()));
 		}
 	}
@@ -117,12 +118,16 @@ public class RefinedGrid extends BasicGame{
 			drawCellSet(grafix,agents.get(i).getOpenCells() , agentColors.get(i),Color.black);
 			drawCellSet(grafix,agents.get(i).getClosedCells() , Color.gray,Color.black);
 			
+			
+			
+		}
+		
+		for (int i = 0; i < agents.size(); i++) {
 			if (agents.get(i).isFinished())
 				drawParentLine(grafix, agents.get(i).getFinishedLine(), agentColors.get(i));
 			else {
 				drawParentLine(grafix, agents.get(i).getClosestLine(), agentColors.get(i));
 			}
-			
 		}
 		
 		for (int i = 0; i < agents.size(); i++) {
