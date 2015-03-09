@@ -13,6 +13,7 @@ buildscript {
 
     dependencies {
         classpath 'com.stehno:gradle-natives:0.2.1'
+      
     }
 }
 
@@ -22,6 +23,19 @@ repositories {
 	mavenCentral()
 }
 
+
+//task copierTest(type: Copy) {
+	//from zipTree(file(gradle.gradleUserHomeDir.getPath()+'/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl-platform/2.9.3/fbc2afb3e288578e9942578decb6291a490549a0/lwjgl-platform-2.9.3-natives-windows.jar'))//, include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar')
+	//from zipTree((gradle.gradleUserHomeDir.getPath()+'/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl-platform/2.9.3/**/*.jar'))
+//	println configurations.compile.getName()
+	//from zipTree(configurations.compile.files({'lwjgl-platform-2.9.3-natives-windows.jar'}))
+	//println(configurations.compile.getFiles())
+//	configurations.compile.each { File file -> println file.name }
+//	from 'build/tmp'
+	//from 'build/tmp/expandedArchives'
+//	into 'build/natives'
+//}
+
 dependencies {
 	compile group: 'org.slick2d', name: 'slick2d-core', version: '1.0.1'
 	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.+'
@@ -29,6 +43,8 @@ dependencies {
 		builtBy 'extractNatives'
 	}
 }
+
+
 
 natives {
 	jars = [ 'lwjgl-platform-2.9.3-natives-windows', 
@@ -54,39 +70,35 @@ task prepNativesFolder << {
 //        '**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-osx', 
 //        '**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-linux']
 task extractNatives(type: Copy) << {
-
-	File natvsFolder = new File("$buildDir/natives")
-	if (! natvsFolder.exists()) {
+//copy{
+	File nat = new File("$buildDir/natives")
+	if (! nat.exists()) {
 		println "Creating native library location."
-		natvsFolder.mkdirs()
-		if (natvsFolder.exists()) {
+		nat.mkdirs()
+		if (nat.exists()) {
 			println "Creation success."
 		}
 	}
-	//println "somethingsomething"
-//	println configurations.runtime.getFiles()
-//	println "somethingSomething"
-	
+
 	FileTree winFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar')
-//	println winFT.getFiles()
+	FileTree winJI = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-windows.jar')
 	FileTree osxFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-osx.jar')
-//	println osxFT.getFiles()
+	FileTree osxJI = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-osx.jar')
 	FileTree linFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-linux.jar')
-//	println linFT.getFiles()
-	FileTree natvs = zipTree(winFT.getSingleFile(), include: "*.dll")
-	natvs = natvs + zipTree(osxFT.getSingleFile(), include: "*.dylib")
-	natvs = natvs + zipTree(linFT.getSingleFile(), include: "*.so")
+	FileTree linJI = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-linux.jar')
 	
-	println natvs.getFiles()
-	println "$buildDir"
-	from "$buildDir/tmp/expandedArchives/**"
-	inputs.files("$buildDir/tmp/expandedArchives/**")
-	outputs.dir "$buildDir/natives"
-	into "$buildDir/natives"
+	FileTree natvs = zipTree(winFT.getSingleFile())
+	natvs = natvs + zipTree(osxFT.getSingleFile())
+	natvs = natvs + zipTree(linFT.getSingleFile())
+	natvs = natvs + zipTree(winJI.getSingleFile())
+	natvs = natvs + zipTree(osxJI.getSingleFile())
+	natvs = natvs + zipTree(linJI.getSingleFile())
 	
+	from natvs
+	include '*.dll'
+	include '*.so'
+	include '*.dylib'
+	into 'build/natives'
+//}
 }
 
-//task copyTask(type: Copy) {
-//	from "$buildDir/tmp/expandedArchives/**"
-//	into "$buildDir/natives"
-//}
