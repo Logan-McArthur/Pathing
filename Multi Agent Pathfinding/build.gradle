@@ -1,5 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'application'
+mainClassName = "agentpathing.RefinedGrid"
+applicationDefaultJvmArgs = ["-Djava.library.path=$buildDir/natives"]
+
+defaultTasks 'run'
 
 buildscript {
     repositories {
@@ -20,6 +25,9 @@ repositories {
 dependencies {
 	compile group: 'org.slick2d', name: 'slick2d-core', version: '1.0.1'
 	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.+'
+	runtime files("$buildDir/natives") {
+		builtBy 'extractNatives'
+	}
 }
 
 natives {
@@ -31,3 +39,54 @@ natives {
         'jinput-platform-2.0.5-natives-osx.jar' ]
 	platforms = 'windows'
 }
+
+task prepNativesFolder << {
+	File natvs = new File("$buildDir/natives")
+	if (! natvs.exists()) {
+		println "Creating native library location."
+		natvs.mkdirs()
+		if (natvs.exists()) {
+			println "Creation success."
+		}
+	}
+}
+//, includes: ['**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-windows', 
+//        '**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-osx', 
+//        '**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-linux']
+task extractNatives(type: Copy) << {
+
+	File natvsFolder = new File("$buildDir/natives")
+	if (! natvsFolder.exists()) {
+		println "Creating native library location."
+		natvsFolder.mkdirs()
+		if (natvsFolder.exists()) {
+			println "Creation success."
+		}
+	}
+	//println "somethingsomething"
+//	println configurations.runtime.getFiles()
+//	println "somethingSomething"
+	
+	FileTree winFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar')
+//	println winFT.getFiles()
+	FileTree osxFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-osx.jar')
+//	println osxFT.getFiles()
+	FileTree linFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-linux.jar')
+//	println linFT.getFiles()
+	FileTree natvs = zipTree(winFT.getSingleFile(), include: "*.dll")
+	natvs = natvs + zipTree(osxFT.getSingleFile(), include: "*.dylib")
+	natvs = natvs + zipTree(linFT.getSingleFile(), include: "*.so")
+	
+	println natvs.getFiles()
+	println "$buildDir"
+	from "$buildDir/tmp/expandedArchives/**"
+	inputs.files("$buildDir/tmp/expandedArchives/**")
+	outputs.dir "$buildDir/natives"
+	into "$buildDir/natives"
+	
+}
+
+//task copyTask(type: Copy) {
+//	from "$buildDir/tmp/expandedArchives/**"
+//	into "$buildDir/natives"
+//}
