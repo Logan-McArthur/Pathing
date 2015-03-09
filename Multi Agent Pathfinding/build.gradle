@@ -23,18 +23,12 @@ repositories {
 	mavenCentral()
 }
 
-
-//task copierTest(type: Copy) {
-	//from zipTree(file(gradle.gradleUserHomeDir.getPath()+'/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl-platform/2.9.3/fbc2afb3e288578e9942578decb6291a490549a0/lwjgl-platform-2.9.3-natives-windows.jar'))//, include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar')
-	//from zipTree((gradle.gradleUserHomeDir.getPath()+'/caches/modules-2/files-2.1/org.lwjgl.lwjgl/lwjgl-platform/2.9.3/**/*.jar'))
-//	println configurations.compile.getName()
-	//from zipTree(configurations.compile.files({'lwjgl-platform-2.9.3-natives-windows.jar'}))
-	//println(configurations.compile.getFiles())
-//	configurations.compile.each { File file -> println file.name }
-//	from 'build/tmp'
-	//from 'build/tmp/expandedArchives'
-//	into 'build/natives'
-//}
+def winLWJGLNative = '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar'
+def winJInNative = '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-windows.jar'
+def osxLWJGLNative = '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-osx.jar'
+def osxJInNative = '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-osx.jar'
+def linLWJGLNative = '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-linux.jar'
+def linJInNative = '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-linux.jar'
 
 dependencies {
 	compile group: 'org.slick2d', name: 'slick2d-core', version: '1.0.1'
@@ -66,12 +60,11 @@ task prepNativesFolder << {
 		}
 	}
 }
-//, includes: ['**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-windows', 
-//        '**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-osx', 
-//        '**/lwjgl-platform/**/lwjgl-platform-2.9.3-natives-linux']
-task extractNatives(type: Copy) << {
+
+task extractNatives << {
 //copy{
-	File nat = new File("$buildDir/natives")
+
+	File nat = file("build/natives")
 	if (! nat.exists()) {
 		println "Creating native library location."
 		nat.mkdirs()
@@ -79,26 +72,35 @@ task extractNatives(type: Copy) << {
 			println "Creation success."
 		}
 	}
-
-	FileTree winFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar')
-	FileTree winJI = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-windows.jar')
-	FileTree osxFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-osx.jar')
-	FileTree osxJI = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-osx.jar')
-	FileTree linFT = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-linux.jar')
-	FileTree linJI = fileTree(dir: gradle.gradleUserHomeDir.getPath(), include: '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-linux.jar')
 	
-	FileTree natvs = zipTree(winFT.getSingleFile())
-	natvs = natvs + zipTree(osxFT.getSingleFile())
-	natvs = natvs + zipTree(linFT.getSingleFile())
-	natvs = natvs + zipTree(winJI.getSingleFile())
-	natvs = natvs + zipTree(osxJI.getSingleFile())
-	natvs = natvs + zipTree(linJI.getSingleFile())
+	if ( nat.listFiles() != null && nat.listFiles().length > 1) {
+		println "Found stuff"
+	} else {
+		String grad = gradle.gradleUserHomeDir.getPath()
 	
-	from natvs
-	include '*.dll'
-	include '*.so'
-	include '*.dylib'
-	into 'build/natives'
-//}
+		FileTree winFT = fileTree(dir: grad, include: winLWJGLNative)
+		FileTree winJI = fileTree(dir: grad, include: winJInNative)
+		FileTree osxFT = fileTree(dir: grad, include: osxLWJGLNative)
+		FileTree osxJI = fileTree(dir: grad, include: osxJInNative)
+		FileTree linFT = fileTree(dir: grad, include: linLWJGLNative)
+		FileTree linJI = fileTree(dir: grad, include: linJInNative)
+	
+		FileTree natvs = zipTree(winFT.getSingleFile())
+		natvs = natvs + zipTree(osxFT.getSingleFile())
+		natvs = natvs + zipTree(linFT.getSingleFile())
+		natvs = natvs + zipTree(winJI.getSingleFile())
+		natvs = natvs + zipTree(osxJI.getSingleFile())
+		natvs = natvs + zipTree(linJI.getSingleFile())
+		
+		println natvs
+	
+		copy {
+			from natvs
+			include '*.dll'
+			include '*.so'
+			include '*.dylib'
+			into 'build/natives'
+		}
+	}
 }
 
