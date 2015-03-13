@@ -1,10 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
-mainClassName = "agentpathing.RefinedGrid"
-applicationDefaultJvmArgs = ["-Djava.library.path=$buildDir/natives"]
 
-defaultTasks 'run'
 
 buildscript {
     repositories {
@@ -15,30 +12,18 @@ buildscript {
         classpath 'com.stehno:gradle-natives:0.2.1'
       
     }
-}
 
+}
 apply plugin:'com.stehno.natives'
+defaultTasks 'run'
 
-repositories {
-	mavenCentral()
+mainClassName = "agentpathing.RefinedGrid"
+
+run {
+    //main = "agentpathing.RefinedGrid"
+    systemProperty 'java.library.path', file( 'build/natives/windows' )
+
 }
-
-def winLWJGLNative = '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-windows.jar'
-def winJInNative = '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-windows.jar'
-def osxLWJGLNative = '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-osx.jar'
-def osxJInNative = '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-osx.jar'
-def linLWJGLNative = '**/lwjgl-platform/2.9.3/**/lwjgl-platform-2.9.3-natives-linux.jar'
-def linJInNative = '**/jinput-platform/2.0.5/**/jinput-platform-2.0.5-natives-linux.jar'
-
-dependencies {
-	compile group: 'org.slick2d', name: 'slick2d-core', version: '1.0.1'
-	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.+'
-	runtime files("$buildDir/natives") {
-		builtBy 'extractNatives'
-	}
-}
-
-
 
 natives {
 	jars = [ 'lwjgl-platform-2.9.3-natives-windows', 
@@ -50,57 +35,25 @@ natives {
 	platforms = 'windows'
 }
 
-task prepNativesFolder << {
-	File natvs = new File("$buildDir/natives")
-	if (! natvs.exists()) {
-		println "Creating native library location."
-		natvs.mkdirs()
-		if (natvs.exists()) {
-			println "Creation success."
-		}
-	}
+repositories {
+	mavenCentral()
 }
 
-task extractNatives << {
-//copy{
+dependencies {
+	compile group: 'org.slick2d', name: 'slick2d-core', version: '1.0.1'
+	compile group: 'org.lwjgl.lwjgl', name: 'lwjgl', version: '2.9.+'
+//	compile files("$buildDir/natives") {
+//		builtBy 'unpackNatives'
+//	}
+	
+}
 
-	File nat = file("build/natives")
-	if (! nat.exists()) {
-		println "Creating native library location."
-		nat.mkdirs()
-		if (nat.exists()) {
-			println "Creation success."
-		}
-	}
-	
-	if ( nat.listFiles() != null && nat.listFiles().length > 1) {
-		println "Found stuff"
-	} else {
-		String grad = gradle.gradleUserHomeDir.getPath()
-	
-		FileTree winFT = fileTree(dir: grad, include: winLWJGLNative)
-		FileTree winJI = fileTree(dir: grad, include: winJInNative)
-		FileTree osxFT = fileTree(dir: grad, include: osxLWJGLNative)
-		FileTree osxJI = fileTree(dir: grad, include: osxJInNative)
-		FileTree linFT = fileTree(dir: grad, include: linLWJGLNative)
-		FileTree linJI = fileTree(dir: grad, include: linJInNative)
-	
-		FileTree natvs = zipTree(winFT.getSingleFile())
-		natvs = natvs + zipTree(osxFT.getSingleFile())
-		natvs = natvs + zipTree(linFT.getSingleFile())
-		natvs = natvs + zipTree(winJI.getSingleFile())
-		natvs = natvs + zipTree(osxJI.getSingleFile())
-		natvs = natvs + zipTree(linJI.getSingleFile())
+// This doesn't have to be here specificaly
+
+
+task begin(dependsOn: unpackNatives) << {
+	run {
+	    systemProperty 'java.library.path', file( 'build/natives/windows' )
 		
-		println natvs
-	
-		copy {
-			from natvs
-			include '*.dll'
-			include '*.so'
-			include '*.dylib'
-			into 'build/natives'
-		}
 	}
 }
-
