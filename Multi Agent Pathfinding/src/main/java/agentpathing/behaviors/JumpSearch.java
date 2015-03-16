@@ -81,36 +81,36 @@ public class JumpSearch extends SearchBehavior {
 		return foundCells;
 	}
 	
-	private void expandDiagonal(Set<Cell> cells, int x, int y, int dX, int dY) {
-		// This one expands horizontal and vertical
-		// dX and dY should both not be zero
-		
-		if (dX == 0 || dY == 0) {
-			throw new IllegalArgumentException("dX and dY may not be zero while expanding diagonally.");
-		}
-		boolean result = false;
-		while (!cellGrid.isOutOfBounds(x, y) && cellGrid.isWalkableCell(x, y) && (cellGrid.isWalkableCell(x-dX, y) || cellGrid.isWalkableCell(x, y-dY)) && !result) {
-			result = expandAxis(null, x, y, dX, 0);
-			result = expandAxis(null, x, y, 0, dY) || result;
-			if (result) {	// If they don't find anything, continue on to the next place
-				cells.add(cellGrid.getCell(x, y));
-			}
-			x += dX;
-			y += dY;
-		}		
-	}
-	
-	private boolean expandShallowDiagonal(Set<Cell> cells, int x, int y, int dX, int dY) {
-//		Set<Cell> cells = new HashSet<Cell>();
-		boolean result = false;
-		if (!cellGrid.isOutOfBounds(x, y) && cellGrid.isWalkableCell(x, y)) {
-//			result = getForcedNeighbor(cells, x, y, dX, dY);
-			result = expandAxis(cells, x, y, dX, 0) || result;
-			result = expandAxis(cells, x, y, 0, dY) || result;
-		}
-//		return cells;
-		return result;
-	}
+//	private void expandDiagonal(Set<Cell> cells, int x, int y, int dX, int dY) {
+//		// This one expands horizontal and vertical
+//		// dX and dY should both not be zero
+//		
+//		if (dX == 0 || dY == 0) {
+//			throw new IllegalArgumentException("dX and dY may not be zero while expanding diagonally.");
+//		}
+//		boolean result = false;
+//		while (!cellGrid.isOutOfBounds(x, y) && cellGrid.isWalkableCell(x, y) && (cellGrid.isWalkableCell(x-dX, y) || cellGrid.isWalkableCell(x, y-dY)) && !result) {
+//			result = expandAxis(null, x, y, dX, 0);
+//			result = expandAxis(null, x, y, 0, dY) || result;
+//			if (result) {	// If they don't find anything, continue on to the next place
+//				cells.add(cellGrid.getCell(x, y));
+//			}
+//			x += dX;
+//			y += dY;
+//		}		
+//	}
+//	
+//	private boolean expandShallowDiagonal(Set<Cell> cells, int x, int y, int dX, int dY) {
+////		Set<Cell> cells = new HashSet<Cell>();
+//		boolean result = false;
+//		if (!cellGrid.isOutOfBounds(x, y) && cellGrid.isWalkableCell(x, y)) {
+////			result = getForcedNeighbor(cells, x, y, dX, dY);
+//			result = expandAxis(cells, x, y, dX, 0) || result;
+//			result = expandAxis(cells, x, y, 0, dY) || result;
+//		}
+////		return cells;
+//		return result;
+//	}
 	
 	private boolean doAxis(Set<Cell> cells, int x, int y, int dX, int dY) {
 		boolean result = false;
@@ -158,33 +158,33 @@ public class JumpSearch extends SearchBehavior {
 		return !cellGrid.isOutOfBounds(x, y) && cellGrid.isWalkableCell(x, y);
 	}
 	
-	private boolean expandAxis(Set<Cell> cells, int x, int y, int dX, int dY) {
-		// dX and dY can not both be non zero
-		boolean result = false;
-		while(!cellGrid.isOutOfBounds(x, y) && cellGrid.getCell(x, y).getWalkable()) {
-			if (cellGrid.getCell(x, y).equals(agent.getGoal())) {
-				if (cells != null) {
-					cells.add(cellGrid.getCell(x, y));
-				}
-				result = true;
-				break;
-			}
-			if ( ! cellGrid.isOutOfBounds(x + dX , y + dY) && cellGrid.isWalkableCell(x+dX, y+dY)) {
-				if (getForcedNeighbor(null, x,y,dX,dY)) {		// Was previously null for cells
-					if (cells != null) {
-						cells.add(cellGrid.getCell(x, y));
-					}
-					result = true;
-				}
-//				cells.addAll(getForcedNeighbor(x, y, dX, dY));
-			}
-			// Remember, one of dY or dX will be zero, but not both
-			y += dY;
-			x += dX;
-		}
-//		return cells;
-		return result;
-	}
+//	private boolean expandAxis(Set<Cell> cells, int x, int y, int dX, int dY) {
+//		// dX and dY can not both be non zero
+//		boolean result = false;
+//		while(!cellGrid.isOutOfBounds(x, y) && cellGrid.getCell(x, y).getWalkable()) {
+//			if (cellGrid.getCell(x, y).equals(agent.getGoal())) {
+//				if (cells != null) {
+//					cells.add(cellGrid.getCell(x, y));
+//				}
+//				result = true;
+//				break;
+//			}
+//			if ( ! cellGrid.isOutOfBounds(x + dX , y + dY) && cellGrid.isWalkableCell(x+dX, y+dY)) {
+//				if (getForcedNeighbor(null, x,y,dX,dY)) {		// Was previously null for cells
+//					if (cells != null) {
+//						cells.add(cellGrid.getCell(x, y));
+//					}
+//					result = true;
+//				}
+////				cells.addAll(getForcedNeighbor(x, y, dX, dY));
+//			}
+//			// Remember, one of dY or dX will be zero, but not both
+//			y += dY;
+//			x += dX;
+//		}
+////		return cells;
+//		return result;
+//	}
 	
 	private boolean getForcedNeighbor(int x, int y, int dX, int dY) {
 		return getForcedNeighbor(null, x, y, dX, dY);
@@ -219,16 +219,16 @@ public class JumpSearch extends SearchBehavior {
 		
 	}
 	
-	private boolean getForcedNeighborInternal(Set<Cell> cells, int x, int y, int delX, int delY) {
-		boolean result = false;
-		if (! cellGrid.isOutOfBounds(x + delX, y + delY) && cellGrid.isWalkableCell(x + delX, y + delY) && cellGrid.cutsCorners(x, y, delX, delY)) {
-			if (cells != null) {
-				cells.add(cellGrid.getCell(x + delX, y + delY));
-			}
-			result = true;
-		}
-		return result;
-	}
+//	private boolean getForcedNeighborInternal(Set<Cell> cells, int x, int y, int delX, int delY) {
+//		boolean result = false;
+//		if (! cellGrid.isOutOfBounds(x + delX, y + delY) && cellGrid.isWalkableCell(x + delX, y + delY) && cellGrid.cutsCorners(x, y, delX, delY)) {
+//			if (cells != null) {
+//				cells.add(cellGrid.getCell(x + delX, y + delY));
+//			}
+//			result = true;
+//		}
+//		return result;
+//	}
 	
 //	private boolean getForcedNeighborDiag(Set<Cell> cells, int x, int y, int dX, int dY) {
 //		
