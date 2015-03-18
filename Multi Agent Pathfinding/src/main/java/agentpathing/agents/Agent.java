@@ -1,4 +1,4 @@
-package agentpathing;
+package agentpathing.agents;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -7,6 +7,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import agentpathing.Cell;
 import agentpathing.behaviors.SearchBehavior;
 
 
@@ -108,22 +109,9 @@ public class Agent {
 			pathEnd = current;
 		}
 		
-		int dX = 0;
-		int dY = 0;
-		if (current.previous != null) {
-			dX = current.node.getX() - current.previous.node.getX();
-			dY = current.node.getY() - current.previous.node.getY();
-			if (dX > 0) {
-				dX = 1;
-			} else if (dX < 0) {
-				dX = -1;
-			}
-			if (dY > 0) {
-				dY = 1;
-			} else if (dY < 0) {
-				dY = -1;
-			}
-		}
+		int dX = current.getUnitDirectionX();
+		int dY = current.getUnitDirectionY();
+
 		
 		Set<Cell> considerSet = getConnectedCells(current.node, dX, dY);
 		considerSet.removeAll(getCellsFromCollection(closedCells));
@@ -152,7 +140,7 @@ public class Agent {
 		return getStepCost(start.node,end.node);
 	}
 	
-	private int getStepCost(Cell start, Cell end) {
+	protected int getStepCost(Cell start, Cell end) {
 		boolean vertical = start.getX() == end.getX();
 		boolean horizontal = start.getY() == end.getY();
 		if ((vertical && !horizontal) || (!vertical && horizontal)) {
@@ -203,7 +191,7 @@ public class Agent {
 		return null;
 	}
 	
-	private class PathStep implements Comparable<PathStep>{
+	public class PathStep implements Comparable<PathStep>{
 
 		@Override
 		public boolean equals(Object obj) {
@@ -231,6 +219,7 @@ public class Agent {
 		
 		public int compareTo(PathStep compare) {
 			// TODO: PathStep.compareTo() must be changed
+//			return pathCost + goalCost - (compare.pathCost + compare.goalCost);
 			Integer ours = new Integer(pathCost+goalCost);
 			Integer theirs = new Integer(compare.pathCost + compare.goalCost);
 			return ours.compareTo(theirs);
@@ -239,7 +228,8 @@ public class Agent {
 		public boolean isBetterPath(PathStep possiblePrev, int step) {
 			// get cost of possiblePrev and add it to the cost from possiblePrev to this
 			// get current cost
-			int possibleCost = possiblePrev.pathCost + step + getTurnCost(possiblePrev);
+//			int possibleCost = possiblePrev.pathCost + step + getTurnCost(possiblePrev);
+			int possibleCost = possiblePrev.pathCost + step;
 			return possibleCost < pathCost;
 		}
 		
@@ -247,35 +237,38 @@ public class Agent {
 			if (prev == null) {
 				pathCost = stepCost;
 			} else {
-				pathCost = prev.pathCost + Math.max(Math.abs(prev.node.getX()-node.getX()), Math.abs(prev.node.getY()-node.getY()))*stepCost + getTurnCost(prev);
+//				pathCost = prev.pathCost + Math.max(Math.abs(prev.node.getX()-node.getX()), Math.abs(prev.node.getY()-node.getY()))*stepCost + getTurnCost(prev);
+				pathCost = prev.pathCost + Math.max(Math.abs(prev.node.getX()-node.getX()), Math.abs(prev.node.getY()-node.getY()))*stepCost;
+
 			}
 			this.goalCost = goalCost;
 			this.previous = prev;
 		}
 		
-		public int getTurnCost(PathStep prev) {
-			if (prev == null) {		// This is the start point
-				return 0;
-			}
-			if (prev.previous == null) {	// Two points only make a line, a third is necessary
-				return 0;
-			}
-			int cost = 0;
-			// Initialize the values, I'll be using them as vectors
-			int dx1 = node.getX() - prev.node.getX();
-			int dy1 = node.getY() - prev.node.getY();
-			int dx2 = prev.node.getX() - prev.previous.node.getX();
-			int dy2 = prev.node.getY() - prev.previous.node.getY();
-
-			if (dx1 == dx2 && dy1 == dy2) {		// Straight line
-				cost = 0;
-			} else if (dx1 == dx2 || dy1 == dy2) {	// Else if will make it so that BOTH pairs are not equal, just one of them
-				cost = 7;
-			} else {		// They're perpendicular
-				cost = 15;
-			}
-			return cost;
-		}
+//		public int getTurnCost(PathStep prev) {
+//			return 0;
+////			if (prev == null) {		// This is the start point
+////				return 0;
+////			}
+////			if (prev.previous == null) {	// Two points only make a line, a third is necessary
+////				return 0;
+////			}
+////			int cost = 0;
+////			// Initialize the values, I'll be using them as vectors
+////			int dx1 = getUnitDirectionX();
+////			int dy1 = getUnitDirectionY();
+////			int dx2 = prev.getUnitDirectionX();
+////			int dy2 = prev.getUnitDirectionY();
+////
+////			if (dx1 == dx2 && dy1 == dy2) {		// Straight line
+////				cost = 0;
+////			} else if (dx1 == dx2 || dy1 == dy2) {	// Else if will make it so that BOTH pairs are not equal, just one of them
+////				cost = 7;
+////			} else {		// They're perpendicular
+////				cost = 15;
+////			}
+////			return cost;
+//		}
 		
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
@@ -286,6 +279,31 @@ public class Agent {
 				builder.append("Previous: [" + previous.node + "]");
 			}
 			return builder.toString();
+		}
+		
+		public int getUnitDirectionX() {
+			int dX = 0;
+			if (previous != null) {
+				dX = node.getX() - previous.node.getX();
+			}
+			if (dX > 0) {
+				dX = 1;
+			} else if (dX < 0) {
+				dX = -1;
+			}
+			return dX;
+		}
+		public int getUnitDirectionY() {
+			int dY = 0;
+			if (previous != null) {
+				dY = node.getY() - previous.node.getY();
+			}
+			if (dY > 0) {
+				dY = 1;
+			} else if (dY < 0) {
+				dY = -1;
+			}
+			return dY;
 		}
 	}
 }

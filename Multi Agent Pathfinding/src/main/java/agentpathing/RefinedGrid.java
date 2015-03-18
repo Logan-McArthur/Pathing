@@ -15,6 +15,7 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 
+import agentpathing.agents.Agent;
 import agentpathing.behaviors.AStarSearch;
 import agentpathing.behaviors.JumpSearch;
 
@@ -66,7 +67,7 @@ public class RefinedGrid extends BasicGame{
 	private void createAgents(int number) {
 		for ( ; number > 0; number--) {
 //			agents.add(new Agent(new JumpSearch(cellGrid), cellGrid.getCell(5, 15), cellGrid.getCell(35,15)));
-			agents.add(new Agent(new JumpSearch(cellGrid),getRandomCell(), getRandomCell()));
+			agents.add(new Agent(new AStarSearch(cellGrid),getRandomCell(), getRandomCell()));
 		}
 	}
 	
