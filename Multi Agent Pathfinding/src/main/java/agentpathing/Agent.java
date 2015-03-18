@@ -247,7 +247,7 @@ public class Agent {
 			if (prev == null) {
 				pathCost = stepCost;
 			} else {
-				pathCost = prev.pathCost + stepCost + getTurnCost(prev);
+				pathCost = prev.pathCost + Math.max(Math.abs(prev.node.getX()-node.getX()), Math.abs(prev.node.getY()-node.getY()))*stepCost + getTurnCost(prev);
 			}
 			this.goalCost = goalCost;
 			this.previous = prev;
