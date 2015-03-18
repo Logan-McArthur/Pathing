@@ -8,15 +8,9 @@ import java.util.Queue;
 import java.util.Set;
 
 import agentpathing.Cell;
-import agentpathing.behaviors.SearchBehavior;
 
+public abstract class Agent {
 
-public class Agent {
-
-//	private Grid grid;
-	
-	private SearchBehavior behavior;
-	
 	private Queue<PathStep> openCells = new PriorityQueue<PathStep>();	// openCells should be sorted
 	private Set<PathStep> closedCells = new HashSet<PathStep>();	// closedCells does not need to be
 
@@ -28,14 +22,13 @@ public class Agent {
 	
 	private boolean noPath = false;
 	
-	public Agent(SearchBehavior behave, Cell start, Cell end) {
+	public Agent(Cell start, Cell end) {
 		startCell = start;
 		goalCell = end;
 		pathFront = new PathStep(start, getGoalCost(start));
 		pathEnd = null;
 		openCells.add(pathFront);
-		behavior = behave;
-		behavior.setAgent(this);
+		
 	}
 	
 	public void reset() {
@@ -109,11 +102,7 @@ public class Agent {
 			pathEnd = current;
 		}
 		
-		int dX = current.getUnitDirectionX();
-		int dY = current.getUnitDirectionY();
-
-		
-		Set<Cell> considerSet = getConnectedCells(current.node, dX, dY);
+		Set<Cell> considerSet = getConnectedCells(current);
 		considerSet.removeAll(getCellsFromCollection(closedCells));
 		for (Cell consider : considerSet) {
 		
@@ -136,45 +125,35 @@ public class Agent {
 		}
 	}
 	
+//	protected void removeFromClosed(Set<Cell> cells) {
+//		// Including the cells already in openCells
+//		// Remove the ones in closedCells
+//		//cells.removeAll(closedCells);
+//		int size = cells.size();
+//		for (Cell cll : cells) {
+//			PathStep stp = getStepFromCollection(closedCells, cll);
+//			if (stp != null) {
+//				cells.remove(stp);
+//			}
+//		}
+//		if (size != cells.size()) {
+//			System.out.println("NOT EQUAL");
+//		}
+//	}
+	
 	private int getStepCost(PathStep start, PathStep end) {
 		return getStepCost(start.node,end.node);
 	}
 	
-	protected int getStepCost(Cell start, Cell end) {
-		boolean vertical = start.getX() == end.getX();
-		boolean horizontal = start.getY() == end.getY();
-		if ((vertical && !horizontal) || (!vertical && horizontal)) {
-			return 10;
-		} else {
-			return 14;
-		}
-	}
-	
-	private int getGoalCost(Cell cell) {
-		// Straight line heuristic
-		int dx = goalCell.getX() - cell.getX();
-		int dy = goalCell.getY() - cell.getY();
-		dx*=10;
-		dy*=10;
-		return (int) Math.sqrt(dx*dx+dy*dy);
-	}
+	protected abstract int getStepCost(Cell start, Cell end);
+
+	protected abstract int getGoalCost(Cell cell);
+
+//	
 	
 	// Do not include Cells cut off by corners
-	private Set<Cell> getConnectedCells(Cell center, int dX, int dY) {
-		
-		Set<Cell> cells = behavior.getAdjacentCells(center, dX, dY);	// Consider initializing size to the number of links in center
-		
-		// Including the cells already in openCells
-		// Remove the ones in closedCells
-		//cells.removeAll(closedCells);
-		for (Cell cll : cells) {
-			PathStep stp = getStepFromCollection(closedCells, cll);
-			if (stp != null) {
-				cells.remove(stp);
-			}
-		}
-		return cells;
-	}
+	protected abstract Set<Cell> getConnectedCells(PathStep center);
+
 	
 	private PathStep getStepFromCell(Cell cll) {
 		PathStep result = getStepFromCollection(openCells, cll);
@@ -202,9 +181,9 @@ public class Agent {
 			return false;
 		}
 
-		private Cell node;
+		protected Cell node;
+		protected PathStep previous;
 		
-		private PathStep previous;
 		private int pathCost;
 		private int goalCost;
 		
@@ -219,10 +198,10 @@ public class Agent {
 		
 		public int compareTo(PathStep compare) {
 			// TODO: PathStep.compareTo() must be changed
-//			return pathCost + goalCost - (compare.pathCost + compare.goalCost);
-			Integer ours = new Integer(pathCost+goalCost);
-			Integer theirs = new Integer(compare.pathCost + compare.goalCost);
-			return ours.compareTo(theirs);
+			return pathCost + goalCost - (compare.pathCost + compare.goalCost);
+//			Integer ours = new Integer(pathCost+goalCost);
+//			Integer theirs = new Integer(compare.pathCost + compare.goalCost);
+//			return ours.compareTo(theirs);
 		}
 		
 		public boolean isBetterPath(PathStep possiblePrev, int step) {
@@ -238,37 +217,12 @@ public class Agent {
 				pathCost = stepCost;
 			} else {
 //				pathCost = prev.pathCost + Math.max(Math.abs(prev.node.getX()-node.getX()), Math.abs(prev.node.getY()-node.getY()))*stepCost + getTurnCost(prev);
-				pathCost = prev.pathCost + Math.max(Math.abs(prev.node.getX()-node.getX()), Math.abs(prev.node.getY()-node.getY()))*stepCost;
+				pathCost = prev.pathCost + stepCost;
 
 			}
 			this.goalCost = goalCost;
 			this.previous = prev;
 		}
-		
-//		public int getTurnCost(PathStep prev) {
-//			return 0;
-////			if (prev == null) {		// This is the start point
-////				return 0;
-////			}
-////			if (prev.previous == null) {	// Two points only make a line, a third is necessary
-////				return 0;
-////			}
-////			int cost = 0;
-////			// Initialize the values, I'll be using them as vectors
-////			int dx1 = getUnitDirectionX();
-////			int dy1 = getUnitDirectionY();
-////			int dx2 = prev.getUnitDirectionX();
-////			int dy2 = prev.getUnitDirectionY();
-////
-////			if (dx1 == dx2 && dy1 == dy2) {		// Straight line
-////				cost = 0;
-////			} else if (dx1 == dx2 || dy1 == dy2) {	// Else if will make it so that BOTH pairs are not equal, just one of them
-////				cost = 7;
-////			} else {		// They're perpendicular
-////				cost = 15;
-////			}
-////			return cost;
-//		}
 		
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
@@ -281,29 +235,6 @@ public class Agent {
 			return builder.toString();
 		}
 		
-		public int getUnitDirectionX() {
-			int dX = 0;
-			if (previous != null) {
-				dX = node.getX() - previous.node.getX();
-			}
-			if (dX > 0) {
-				dX = 1;
-			} else if (dX < 0) {
-				dX = -1;
-			}
-			return dX;
-		}
-		public int getUnitDirectionY() {
-			int dY = 0;
-			if (previous != null) {
-				dY = node.getY() - previous.node.getY();
-			}
-			if (dY > 0) {
-				dY = 1;
-			} else if (dY < 0) {
-				dY = -1;
-			}
-			return dY;
-		}
+		
 	}
 }
