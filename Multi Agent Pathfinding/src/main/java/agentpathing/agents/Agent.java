@@ -125,22 +125,6 @@ public abstract class Agent {
 		}
 	}
 	
-//	protected void removeFromClosed(Set<Cell> cells) {
-//		// Including the cells already in openCells
-//		// Remove the ones in closedCells
-//		//cells.removeAll(closedCells);
-//		int size = cells.size();
-//		for (Cell cll : cells) {
-//			PathStep stp = getStepFromCollection(closedCells, cll);
-//			if (stp != null) {
-//				cells.remove(stp);
-//			}
-//		}
-//		if (size != cells.size()) {
-//			System.out.println("NOT EQUAL");
-//		}
-//	}
-	
 	private int getStepCost(PathStep start, PathStep end) {
 		return getStepCost(start.node,end.node);
 	}
@@ -149,16 +133,11 @@ public abstract class Agent {
 
 	protected abstract int getGoalCost(Cell cell);
 
-//	
-	
-	// Do not include Cells cut off by corners
 	protected abstract Set<Cell> getConnectedCells(PathStep center);
 
-	
 	private PathStep getStepFromCell(Cell cll) {
 		PathStep result = getStepFromCollection(openCells, cll);
 		return result;
-		
 	}
 	
 	private PathStep getStepFromCollection(Collection<PathStep> collection, Cell cll) {
