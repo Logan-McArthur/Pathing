@@ -1,9 +1,9 @@
 package agentpathing.behaviors;
 import java.util.Set;
 
-import agentpathing.Agent;
 import agentpathing.Cell;
 import agentpathing.Grid;
+import agentpathing.agents.Agent;
 
 // The class is meant to change how cells are retrieved from the Grid
 public abstract class SearchBehavior {

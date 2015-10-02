@@ -15,8 +15,9 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 
-import agentpathing.behaviors.AStarSearch;
-import agentpathing.behaviors.JumpSearch;
+import agentpathing.agents.Agent;
+import agentpathing.agents.GridAgent;
+import agentpathing.behaviors.*;
 
 
 public class RefinedGrid extends BasicGame{
@@ -40,8 +41,8 @@ public class RefinedGrid extends BasicGame{
 	Grid cellGrid;
 	List<Agent> agents = new ArrayList<Agent>();
 	List<Color> agentColors = new ArrayList<Color>();
-	private final int CELLWIDTH;// = 20;
-	private final int CELLHEIGHT;// = 20;
+	private final int CELLWIDTH;
+	private final int CELLHEIGHT;
 
 	private int containerHeight;
 	public RefinedGrid(String title, int width, int height, int cellWidth, int cellHeight) {
@@ -66,7 +67,7 @@ public class RefinedGrid extends BasicGame{
 	private void createAgents(int number) {
 		for ( ; number > 0; number--) {
 //			agents.add(new Agent(new JumpSearch(cellGrid), cellGrid.getCell(5, 15), cellGrid.getCell(35,15)));
-			agents.add(new Agent(new JumpSearch(cellGrid),getRandomCell(), getRandomCell()));
+			agents.add(new GridAgent(new JumpSearch(cellGrid),getRandomCell(), getRandomCell()));
 		}
 	}
 	
@@ -117,9 +118,6 @@ public class RefinedGrid extends BasicGame{
 		for (int i = 0; i < agents.size(); i++) {
 			drawCellSet(grafix,agents.get(i).getOpenCells() , agentColors.get(i),Color.black);
 			drawCellSet(grafix,agents.get(i).getClosedCells() , Color.gray,Color.black);
-			
-			
-			
 		}
 		
 		for (int i = 0; i < agents.size(); i++) {
