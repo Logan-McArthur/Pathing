@@ -24,8 +24,8 @@ public class RefinedGrid extends BasicGame{
 		try {
 			int windowWidth = 800;
 			int windowHeight = 600;
-			int cellsWide = 200;
-			int cellsTall = 150;
+			int cellsWide = 40;
+			int cellsTall = 30;
 			AppGameContainer app = new AppGameContainer(
 					new RefinedGrid("Title",cellsWide,cellsTall, (windowWidth / cellsWide), (windowHeight / cellsTall) ));
 

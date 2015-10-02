@@ -9,7 +9,6 @@ import java.util.Set;
 
 import agentpathing.behaviors.SearchBehavior;
 
-
 public class Agent {
 
 //	private Grid grid;
@@ -141,7 +140,7 @@ public class Agent {
 				}
 				openCells.add(step);
 			} else if (considerPath.isBetterPath(current, getStepCost(current, considerPath))) {
-				
+				//System.out.println("Found better");
 				considerPath.setPrevious(current, getStepCost(current.node,consider), getGoalCost(considerPath.node));
 				// Check if the path cost for that cell is better if goes through currentCell
 			}
@@ -230,6 +229,7 @@ public class Agent {
 		}
 		
 		public int compareTo(PathStep compare) {
+			//return pathCost + goalCost - (compare.pathCost + compare.goalCost);
 			// TODO: PathStep.compareTo() must be changed
 			Integer ours = new Integer(pathCost+goalCost);
 			Integer theirs = new Integer(compare.pathCost + compare.goalCost);
@@ -254,6 +254,8 @@ public class Agent {
 		}
 		
 		public int getTurnCost(PathStep prev) {
+			return 0;
+			/*
 			if (prev == null) {		// This is the start point
 				return 0;
 			}
@@ -275,6 +277,7 @@ public class Agent {
 				cost = 15;
 			}
 			return cost;
+			*/
 		}
 		
 		public String toString() {

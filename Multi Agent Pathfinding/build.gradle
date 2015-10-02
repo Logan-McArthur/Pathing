@@ -20,7 +20,7 @@ defaultTasks 'run'
 mainClassName = "agentpathing.RefinedGrid"
 
 run {
-    //main = "agentpathing.RefinedGrid"
+    main = "agentpathing.RefinedGrid"
     systemProperty 'java.library.path', file( 'build/natives/windows' )
 
 }

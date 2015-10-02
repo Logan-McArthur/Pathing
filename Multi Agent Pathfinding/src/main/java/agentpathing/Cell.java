@@ -1,6 +1,5 @@
 package agentpathing;
 
-
 public class Cell {
 	
 	// TODO: Consider adding a count of how many links the cell has
